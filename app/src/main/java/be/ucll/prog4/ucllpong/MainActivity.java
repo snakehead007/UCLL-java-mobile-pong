@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        gv.resume();
         super.onResume();
+        gv.resume();
     }
 }
