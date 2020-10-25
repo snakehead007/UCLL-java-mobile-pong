@@ -1,4 +1,4 @@
-package be.ucll.prog4.ucllpong;
+package be.ucll.java.mobile.ucllpong;
 
 import android.app.Activity;
 import android.content.Context;
@@ -11,6 +11,8 @@ import android.widget.TextView;
 import java.util.Random;
 
 public class GameThread extends Thread {
+    private static final String TAG = GameThread.class.getSimpleName();
+
     // Android context
     private final Context ctx;
     private final SurfaceHolder holder;
@@ -23,7 +25,7 @@ public class GameThread extends Thread {
 
     // Canvasses and paint
     private Canvas canvas;
-    private Paint paint;
+    private final Paint redPaint;
 
     // Schermdimensies
     private int schermBreedte;
@@ -34,11 +36,11 @@ public class GameThread extends Thread {
     private float balY;
     private int balHoogte;
     private int balBreedte;
-    private float balSnelheidX;
-    private float balSnelheidY;
+    private float balBewegingX;
+    private float balBewegingY;
 
     //Andere
-    private Random random;
+    private final Random random;
     private int score;
 
     // Constructor
@@ -48,10 +50,30 @@ public class GameThread extends Thread {
 
         txtScore = ((Activity) ctx).findViewById(R.id.txtScore);
 
-        paint = new Paint();
-        paint.setARGB(255, 255, 0, 0);
+        redPaint = new Paint();
+        redPaint.setARGB(255, 255, 0, 0);
 
         random = new Random();
+    }
+
+    public void zetSchermdimenties(int hoogte, int breedte) {
+        Log.d(TAG, "Schermdimenties. hoogte: " + hoogte + ", breedte: " + breedte);
+
+        // Reset schermdimenties. Dit is alleen het geval wanneer het toestel gedraaid wordt.
+        this.schermHoogte = hoogte;
+        this.schermBreedte = breedte;
+
+        // Overige initialisaties
+        balBewegingX = 0f;
+        balBewegingY = 0f;
+        balHoogte = (schermBreedte / 20);
+        balBreedte = (schermBreedte / 20);
+        balX = (schermBreedte / 2) - (balBreedte / 2);
+        balY = schermHoogte / 2; // Dit zal anders moeten worden als bal boven palet moet zweven
+
+        score = 0;
+
+        running = true;
     }
 
     @Override
@@ -59,8 +81,7 @@ public class GameThread extends Thread {
         while (running) {
             try {
                 canvas = holder.lockCanvas();
-                update();
-                draw();
+                tekenBalEnPallet();
             } catch (Throwable t) {
                 t.printStackTrace();
             } finally {
@@ -71,57 +92,33 @@ public class GameThread extends Thread {
         }
     }
 
-    public void initialiseer() {
-        balSnelheidX = 0f;
-        balSnelheidY = 0f;
-        balHoogte = (schermBreedte / 20);
-        balBreedte = (schermBreedte / 20);
-        balX = (schermBreedte / 2) - (balBreedte / 2);
-        balY = schermHoogte / 2; // Dit is fout. Dit zal iets anders moeten worden
-
-        score = 0;
-
-        running = true;
-    }
-
     // Update the canvas. Verplaats de objecten.
-    public void update() {
-        // Verplaats bal in richting x of y
-        balX += balSnelheidX;
-        balY += balSnelheidY;
+    public void tekenBalEnPallet() {
+        // 1. Work the numbers
+        balX += balBewegingX;
+        balY += balBewegingY;
 
+        // 2. Draw on the canvas
+        if (canvas != null) {
+            // Wis het volledige scherm en zet een witte achtergrond
+            canvas.drawRGB(250, 255, 255);
+
+            // Teken de bal. Why rectangle ??? round circles dont have X or Y which makes it difficult to work with
+            canvas.drawRoundRect(balX, balY, balX + balBreedte, balY + balHoogte, 45, 45, redPaint);
+
+            // Teken het rode pallet
+
+        }
     }
 
     public void processTouch(float posX, float posY) {
         // Je moet 1 keer het scherm aanraken om het spel te starten.
-        if (balSnelheidX == 0f && balSnelheidY == 0f) {
-            balSnelheidX = genereerRandomFloat(-5.0f, 5.0f);
-            balSnelheidY = genereerRandomFloat(-5.0f, -2.0f); // Negatief = naar omhoog
+        if (balBewegingX == 0f && balBewegingY == 0f) {
+            balBewegingX = genereerRandomFloat(-5.0f, 5.0f); // X mag positief of negatief zijn
+            balBewegingY = genereerRandomFloat(-5.0f, -2.0f); // Y negatief = naar omhoog
+            Log.d(TAG, "Balbeweging. X: " + balBewegingX + ", Y: " + balBewegingY);
 
-            setText(txtScore, ctx.getString(R.string.score) + ": " + score);
-        }
-    }
-
-    public void zetSchermdimenties(int hoogte, int breedte) {
-        Log.d("GT - Schermdimenties", "Hoogte: " + hoogte + ", breedte: " + breedte);
-
-        // Reset schermdimenties. Dit is alleen het geval wanneer het toestel gedraaid wordt.
-        this.schermHoogte = hoogte;
-        this.schermBreedte = breedte;
-
-        this.initialiseer();
-    }
-
-    private void draw() {
-        if (canvas != null) {
-            // Wis het scherm en zet een witte achtergrond
-            canvas.drawRGB(250, 255, 255);
-
-            // Teken de bal. Why rectangle ??? round circles dont have X or Y which makes it difficult to work with
-            canvas.drawRoundRect(balX, balY, balX + balBreedte, balY + balHoogte, 45, 45, paint);
-
-            // Teken het rode pallet
-
+            setScoreText(txtScore, ctx.getString(R.string.score) + ": " + score);
         }
     }
 
@@ -129,11 +126,11 @@ public class GameThread extends Thread {
         return min + (max - min) * random.nextFloat();
     }
 
-    private void setText(final TextView text, final String value) {
+    private void setScoreText(final TextView txtScore, final String textToDisplay) {
         ((Activity) ctx).runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                text.setText(value);
+                txtScore.setText(textToDisplay);
             }
         });
     }

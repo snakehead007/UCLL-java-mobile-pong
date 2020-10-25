@@ -1,4 +1,4 @@
-package be.ucll.prog4.ucllpong;
+package be.ucll.java.mobile.ucllpong;
 
 import android.content.Context;
 
@@ -22,6 +22,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
 
-        assertEquals("be.ucll.prog4.ucllpong", appContext.getPackageName());
+        assertEquals("be.ucll.java.mobile.ucllpong", appContext.getPackageName());
     }
 }

@@ -1,4 +1,4 @@
-package be.ucll.prog4.ucllpong;
+package be.ucll.java.mobile.ucllpong;
 
 import org.junit.Test;
 
