@@ -63,7 +63,10 @@ public class GameThread extends Thread {
         this.schermHoogte = hoogte;
         this.schermBreedte = breedte;
 
-        // Overige initialisaties
+        initialiseer();
+    }
+
+    private void initialiseer() {
         balBewegingX = 0f;
         balBewegingY = 0f;
         balHoogte = (schermBreedte / 20);
