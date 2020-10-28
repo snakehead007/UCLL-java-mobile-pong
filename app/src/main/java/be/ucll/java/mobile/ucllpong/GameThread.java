@@ -128,7 +128,12 @@ public class GameThread extends Thread {
         if ((balX + balBreedte > palletX) &&
                 (balX < palletX + palletBreedte) &&
                 (balY + balHoogte > palletY)) {
-            balBewegingY *=-1;
+            balBewegingY *= -1;
+
+            // Versnel de bal met 10%
+            balBewegingX = balBewegingX * 1.1f;
+            balBewegingY = balBewegingY * 1.1f;
+
             score++;
             setScoreText(txtScore, ctx.getString(R.string.score) + ": " + score);
         }
