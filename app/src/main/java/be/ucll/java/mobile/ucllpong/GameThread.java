@@ -39,6 +39,12 @@ public class GameThread extends Thread {
     private float balBewegingX;
     private float balBewegingY;
 
+    // De bal
+    private float palletX;
+    private float palletY;
+    private int palletHoogte;
+    private int palletBreedte;
+
     //Andere
     private final Random random;
     private int score;
@@ -67,6 +73,11 @@ public class GameThread extends Thread {
     }
 
     private void initialiseer() {
+        palletBreedte = schermBreedte / 4;
+        palletHoogte = 50;
+        palletX = ((schermBreedte/2)- palletBreedte/2);
+        palletY = schermHoogte - 100;
+
         balBewegingX = 0f;
         balBewegingY = 0f;
         balHoogte = (schermBreedte / 20);
@@ -101,16 +112,27 @@ public class GameThread extends Thread {
         balX += balBewegingX;
         balY += balBewegingY;
 
+        // x 0.0000001256 0.000000000000000000000000000000000000000
+        if (balY < 0f){
+            //bal in andere richten laten kaatsen
+            //balBewegingX = balBewegingX * -1;
+            balBewegingY = balBewegingY * -1;
+        }
+
+        if(balX > (schermBreedte - balBreedte) || balX < 0f){
+            balBewegingX *= -1;
+        }
+
         // 2. Draw on the canvas
         if (canvas != null) {
             // Wis het volledige scherm en zet een witte achtergrond
-            canvas.drawRGB(250, 255, 255);
+            canvas.drawRGB(123, 255, 255);
 
             // Teken de bal. Why rectangle ??? round circles dont have X or Y which makes it difficult to work with
             canvas.drawRoundRect(balX, balY, balX + balBreedte, balY + balHoogte, 45, 45, redPaint);
 
             // Teken het rode pallet
-
+            canvas.drawRoundRect(palletX, palletY, palletX + palletBreedte, palletY + palletHoogte, 45, 45, redPaint);
         }
     }
 
