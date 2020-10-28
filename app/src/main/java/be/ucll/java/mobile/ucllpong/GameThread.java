@@ -7,6 +7,7 @@ import android.graphics.Paint;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.Random;
 
@@ -83,7 +84,8 @@ public class GameThread extends Thread {
         balHoogte = (schermBreedte / 20);
         balBreedte = (schermBreedte / 20);
         balX = (schermBreedte / 2) - (balBreedte / 2);
-        balY = schermHoogte / 2; // Dit zal anders moeten worden als bal boven palet moet zweven
+        //balY = schermHoogte / 2; // Dit zal anders moeten worden als bal boven palet moet zweven
+        balY = palletY - balHoogte - 1;
 
         score = 0;
 
@@ -123,6 +125,18 @@ public class GameThread extends Thread {
             balBewegingX *= -1;
         }
 
+        if ((balX + balBreedte > palletX) &&
+                (balX < palletX + palletBreedte) &&
+                (balY + balHoogte > palletY)) {
+            balBewegingY *=-1;
+            score++;
+            setScoreText(txtScore, ctx.getString(R.string.score) + ": " + score);
+        }
+
+        if (balY > (schermHoogte - balHoogte)){
+            initialiseer();
+        }
+
         // 2. Draw on the canvas
         if (canvas != null) {
             // Wis het volledige scherm en zet een witte achtergrond
@@ -144,6 +158,13 @@ public class GameThread extends Thread {
             Log.d(TAG, "Balbeweging. X: " + balBewegingX + ", Y: " + balBewegingY);
 
             setScoreText(txtScore, ctx.getString(R.string.score) + ": " + score);
+        }
+
+        palletX = posX - (palletBreedte / 2);
+        if(posX < palletBreedte/2) {
+            palletX = 0;
+        } else if (posX > (schermBreedte - palletBreedte/2f)){
+            palletX = schermBreedte - palletBreedte;
         }
     }
 
